@@ -1,0 +1,133 @@
+from fastapi import FastAPI, HTTPException, BackgroundTasks, Request
+from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import FileResponse
+from pydantic import BaseModel
+from dotenv import load_dotenv
+import requests
+import os
+import tempfile
+import subprocess
+import sqlite3
+
+load_dotenv()
+
+app = FastAPI()
+
+# Allow CORS for Expo
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
+
+OPENROUTER_API_KEY = os.environ.get("OPENROUTER_API_KEY")
+
+class ChatRequest(BaseModel):
+    message: str = ""
+    language: str = "Japanese"
+    level: str = "Beginner"
+
+def get_db():
+    conn = sqlite3.connect("tutor.db")
+    conn.row_factory = sqlite3.Row
+    return conn
+
+def setup_db():
+    conn = get_db()
+    conn.execute('''CREATE TABLE IF NOT EXISTS users (
+        id INTEGER PRIMARY KEY,
+        xp INTEGER DEFAULT 0,
+        streak INTEGER DEFAULT 0,
+        hearts INTEGER DEFAULT 5,
+        last_login TEXT
+    )''')
+    cur = conn.execute("SELECT * FROM users WHERE id=1")
+    if not cur.fetchone():
+        conn.execute("INSERT INTO users (id, xp, streak, hearts) VALUES (1, 0, 1, 5)")
+    conn.commit()
+    conn.close()
+
+setup_db()
+
+@app.get("/")
+def read_root():
+    return {"message": "AI Language Tutor Backend MVP"}
+
+@app.post("/api/chat")
+def chat(req: ChatRequest):
+    system_prompt = f"You are a helpful language tutor teaching {req.language} to a {req.level} English speaker. Keep your responses short, conversational, and provide the translation and romanization."
+
+    headers = {
+        "Authorization": f"Bearer {OPENROUTER_API_KEY}",
+        "Content-Type": "application/json"
+    }
+
+    payload = {
+        "model": "openrouter/auto",
+        "messages": [
+            {"role": "system", "content": system_prompt},
+            {"role": "user", "content": req.message}
+        ]
+    }
+
+    try:
+        response = requests.post("https://openrouter.ai/api/v1/chat/completions", headers=headers, json=payload)
+        response.raise_for_status()
+        data = response.json()
+
+        # Add XP for chatting
+        conn = get_db()
+        conn.execute("UPDATE users SET xp = xp + 10 WHERE id=1")
+        conn.commit()
+        conn.close()
+
+        return {"response": data['choices'][0]['message']['content']}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+def remove_file(path: str):
+    try:
+        os.remove(path)
+    except Exception:
+        pass
+
+@app.post("/api/speak")
+@app.get("/api/speak")
+async def speak(request: Request, background_tasks: BackgroundTasks):
+    text = ""
+    language = "Japanese"
+
+    if request.method == "POST":
+        data = await request.json()
+        text = data.get("message", "")
+        language = data.get("language", "Japanese")
+    else:
+        text = request.query_params.get("text", "")
+        language = request.query_params.get("language", "Japanese")
+
+    voice = "ja-JP-NanamiNeural" if language.lower() == "japanese" else "ko-KR-SunHiNeural"
+
+    tmp_file = tempfile.NamedTemporaryFile(delete=False, suffix=".mp3")
+    tmp_file.close()
+
+    try:
+        subprocess.run(["edge-tts", "--voice", voice, "--text", text, "--write-media", tmp_file.name], check=True)
+        background_tasks.add_task(remove_file, tmp_file.name)
+        return FileResponse(tmp_file.name, media_type="audio/mpeg")
+    except Exception as e:
+        remove_file(tmp_file.name)
+        raise HTTPException(status_code=500, detail=str(e))
+
+@app.get("/api/progress")
+def get_progress():
+    conn = get_db()
+    cur = conn.execute("SELECT * FROM users WHERE id=1")
+    user = cur.fetchone()
+    conn.close()
+    return dict(user)
+
+if __name__ == "__main__":
+    import uvicorn
+    uvicorn.run(app, host="0.0.0.0", port=8000)
