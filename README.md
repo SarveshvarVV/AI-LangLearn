@@ -11,31 +11,39 @@ An AI-powered language learning application that combines the structured, gamifi
 
 ---
 
-## 🚀 How to Run and Test the App
+## 🚀 How to Run and Test the App (Windows Supported)
 
-This application is split into two parts: a **Python Backend** and a **React Native Frontend** (using Expo).
+This application is split into two parts: a **Python Backend** and a **React Native Frontend** (using Expo). It fully supports Windows environments.
 
 ### 1. Starting the Backend (FastAPI)
 The backend must be running for the AI chat and voice features to work.
 
-1. Open a terminal and navigate to the backend folder:
-   ```bash
+1. Open a terminal (Command Prompt or PowerShell) and navigate to the backend folder:
+   ```cmd
    cd backend
    ```
-2. Create and activate a Python virtual environment:
-   ```bash
+2. Create a Python virtual environment:
+   ```cmd
    python3 -m venv venv
-   source venv/bin/activate
    ```
-3. Install the dependencies:
-   ```bash
+3. Activate the virtual environment:
+   - **On Windows:**
+     ```cmd
+     venv\Scripts\activate
+     ```
+   - *On Mac/Linux:*
+     ```bash
+     source venv/bin/activate
+     ```
+4. Install the dependencies:
+   ```cmd
    pip install -r requirements.txt
    ```
-4. Configure your API key:
+5. Configure your API key:
    - Rename `.env.example` to `.env`.
    - Open `.env` and replace `your_api_key_here` with your OpenRouter API key.
-5. Start the backend server:
-   ```bash
+6. Start the backend server:
+   ```cmd
    uvicorn main:app --host 0.0.0.0 --port 8000
    ```
    *The backend is now running at `http://localhost:8000`.*
@@ -47,18 +55,18 @@ The backend must be running for the AI chat and voice features to work.
 To test the application as a website directly from your computer:
 
 1. Open a new terminal and navigate to the frontend folder:
-   ```bash
+   ```cmd
    cd frontend
    ```
 2. Install the Node dependencies:
-   ```bash
+   ```cmd
    npm install
    ```
 3. Ensure the configuration points to your local machine:
    - Open `frontend/config.js`.
    - Ensure the `API_URL` is set to `http://localhost:8000` (this should be the default for the web platform).
 4. Start the Expo web server:
-   ```bash
+   ```cmd
    npm run web
    ```
 5. Your browser will automatically open to `http://localhost:8081` where you can view and interact with the app.
@@ -70,16 +78,16 @@ To test the application as a website directly from your computer:
 To test the app directly on your physical mobile phone using the Expo Go app:
 
 1. **Find your computer's local IP address:**
-   - On Windows: Open Command Prompt and type `ipconfig`. Look for "IPv4 Address".
-   - On Mac: Open Terminal and type `ipconfig getifaddr en0`.
-   - On Linux: Open Terminal and type `hostname -I`.
+   - **On Windows:** Open Command Prompt and type `ipconfig`. Look for "IPv4 Address" (e.g., `192.168.1.X`).
+   - *On Mac:* Open Terminal and type `ipconfig getifaddr en0`.
+   - *On Linux:* Open Terminal and type `hostname -I`.
 2. **Update the Frontend Configuration:**
    - Open `frontend/config.js`.
    - Change `http://10.0.2.2:8000` to `http://YOUR_LOCAL_IP:8000`.
    *(Example: `http://192.168.1.50:8000`)*
 3. **Ensure both devices are on the same Wi-Fi network.**
 4. Start the Expo mobile server:
-   ```bash
+   ```cmd
    cd frontend
    npx expo start
    ```
