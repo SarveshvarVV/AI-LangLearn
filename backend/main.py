@@ -147,3 +147,87 @@ def add_xp(req: XPRequest):
     conn.commit()
     conn.close()
     return {"success": True, "added": req.amount}
+
+class GeneratePathRequest(BaseModel):
+    language: str
+    reason: str
+    style: str
+    duration: str
+
+@app.post("/api/generate-path")
+def generate_custom_path(req: GeneratePathRequest):
+    system_prompt = f"You are an expert language curriculum designer. Create a highly customized, gamified {req.language} curriculum."
+
+    user_prompt = f"""
+    The student wants to learn {req.language}.
+    Reason: {req.reason}
+    Preferred Learning Style: {req.style}
+    Duration: {req.duration}
+
+    Generate exactly 2 modules, each containing exactly 2 lessons.
+    Format your response ONLY as valid JSON in this exact structure:
+    [
+      {{
+        "module": "Module Name (e.g., 1: Business Basics)",
+        "lessons": [
+          {{
+            "id": "custom_1",
+            "lesson_name": "Lesson Topic",
+            "persona": "Persona Name (e.g., Strict CEO)",
+            "question": "A multiple choice question...",
+            "options": ["Opt1", "Opt2", "Opt3", "Opt4"],
+            "correct_answer": "Opt1",
+            "xp": 20,
+            "success_dialogue": "Great job!",
+            "fail_dialogue": "Not quite."
+          }}
+        ]
+      }}
+    ]
+    Do not include any markdown formatting like ```json.
+    """
+
+    headers = {
+        "Authorization": f"Bearer {OPENROUTER_API_KEY}",
+        "Content-Type": "application/json"
+    }
+
+    payload = {
+        "model": "openrouter/auto",
+        "messages": [
+            {"role": "system", "content": system_prompt},
+            {"role": "user", "content": user_prompt}
+        ]
+    }
+
+    try:
+        response = requests.post("https://openrouter.ai/api/v1/chat/completions", headers=headers, json=payload)
+        response.raise_for_status()
+        data = response.json()
+        ai_text = data['choices'][0]['message']['content'].strip()
+        # Clean markdown if AI includes it
+        ai_text = ai_text.replace("```json", "").replace("```", "").strip()
+        import json
+        curriculum = json.loads(ai_text)
+        return curriculum
+    except Exception as e:
+        print(f"Error generating path: {e}")
+        # Return a fallback custom path if AI fails
+        return [
+            {
+                "module": f"1: Custom {req.language} Basics",
+                "lessons": [
+                    {
+                        "id": "fallback_1",
+                        "lesson_name": "Getting Started",
+                        "persona": "AI Guide",
+                        "question": f"How do you say 'Hello' in {req.language}?",
+                        "options": ["Hello", "Goodbye", "Yes", "No"],
+                        "correct_answer": "Hello",
+                        "xp": 20,
+                        "success_dialogue": "Perfect start!",
+                        "fail_dialogue": "Try again."
+                    }
+                ]
+            }
+        ]

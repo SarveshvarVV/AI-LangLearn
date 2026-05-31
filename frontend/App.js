@@ -11,14 +11,26 @@ import ChatScreen from './screens/ChatScreen';
 import ProfileScreen from './screens/ProfileScreen';
 import OnboardingScreen from './screens/OnboardingScreen';
 import LessonScreen from './screens/LessonScreen';
+import CustomPathScreen from './screens/CustomPathScreen';
 
 const Tab = createBottomTabNavigator();
 const Stack = createNativeStackNavigator();
 
+// Fixed Path Stack
 function HomeStack() {
   return (
     <Stack.Navigator screenOptions={{ headerShown: false }}>
       <Stack.Screen name="Path" component={HomeScreen} />
+      <Stack.Screen name="Lesson" component={LessonScreen} />
+    </Stack.Navigator>
+  );
+}
+
+// Custom AI Path Stack
+function CustomStack() {
+  return (
+    <Stack.Navigator screenOptions={{ headerShown: false }}>
+      <Stack.Screen name="CustomPath" component={CustomPathScreen} />
       <Stack.Screen name="Lesson" component={LessonScreen} />
     </Stack.Navigator>
   );
@@ -38,7 +50,9 @@ function AppContent() {
           headerShown: false,
           tabBarIcon: ({ focused, color, size }) => {
             if (route.name === 'Learn') {
-              return <FontAwesome5 name="home" size={size} color={color} />;
+              return <FontAwesome5 name="map" size={size} color={color} />;
+            } else if (route.name === 'Custom') {
+              return <FontAwesome5 name="magic" size={size} color={color} />;
             } else if (route.name === 'Tutor') {
               return <Ionicons name="chatbubbles" size={size} color={color} />;
             } else if (route.name === 'Profile') {
@@ -59,6 +73,7 @@ function AppContent() {
         })}
       >
         <Tab.Screen name="Learn" component={HomeStack} />
+        <Tab.Screen name="Custom" component={CustomStack} />
         <Tab.Screen name="Tutor" component={ChatScreen} />
         <Tab.Screen name="Profile" component={ProfileScreen} />
       </Tab.Navigator>
