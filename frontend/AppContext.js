@@ -1,0 +1,14 @@
+import React, { createContext, useState } from 'react';
+
+export const AppContext = createContext();
+
+export const AppProvider = ({ children }) => {
+  const [language, setLanguage] = useState(null); // e.g., 'Japanese' or 'Korean'
+  const [progress, setProgress] = useState({ xp: 0, streak: 0, hearts: 5 });
+
+  return (
+    <AppContext.Provider value={{ language, setLanguage, progress, setProgress }}>
+      {children}
+    </AppContext.Provider>
+  );
+};
