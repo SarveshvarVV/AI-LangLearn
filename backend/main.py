@@ -8,6 +8,7 @@ import os
 import tempfile
 import subprocess
 import sqlite3
+from curriculum import get_curriculum
 
 load_dotenv()
 
@@ -131,3 +132,18 @@ def get_progress():
 if __name__ == "__main__":
     import uvicorn
     uvicorn.run(app, host="0.0.0.0", port=8000)
+
+@app.get("/api/curriculum")
+def get_language_curriculum(language: str = "Japanese"):
+    return get_curriculum(language)
+
+class XPRequest(BaseModel):
+    amount: int
+
+@app.post("/api/xp")
+def add_xp(req: XPRequest):
+    conn = get_db()
+    conn.execute("UPDATE users SET xp = xp + ? WHERE id=1", (req.amount,))
+    conn.commit()
+    conn.close()
+    return {"success": True, "added": req.amount}
