@@ -12,11 +12,12 @@ import ProfileScreen from './screens/ProfileScreen';
 import OnboardingScreen from './screens/OnboardingScreen';
 import LessonScreen from './screens/LessonScreen';
 import CustomPathScreen from './screens/CustomPathScreen';
+import RoleplayScreen from './screens/RoleplayScreen';
+import CallScreen from './screens/CallScreen';
 
 const Tab = createBottomTabNavigator();
 const Stack = createNativeStackNavigator();
 
-// Fixed Path Stack
 function HomeStack() {
   return (
     <Stack.Navigator screenOptions={{ headerShown: false }}>
@@ -26,12 +27,20 @@ function HomeStack() {
   );
 }
 
-// Custom AI Path Stack
 function CustomStack() {
   return (
     <Stack.Navigator screenOptions={{ headerShown: false }}>
       <Stack.Screen name="CustomPath" component={CustomPathScreen} />
       <Stack.Screen name="Lesson" component={LessonScreen} />
+    </Stack.Navigator>
+  );
+}
+
+function RoleplayStack() {
+  return (
+    <Stack.Navigator screenOptions={{ headerShown: false }}>
+      <Stack.Screen name="RoleplayMenu" component={RoleplayScreen} />
+      <Stack.Screen name="Call" component={CallScreen} />
     </Stack.Navigator>
   );
 }
@@ -53,6 +62,8 @@ function AppContent() {
               return <FontAwesome5 name="map" size={size} color={color} />;
             } else if (route.name === 'Custom') {
               return <FontAwesome5 name="magic" size={size} color={color} />;
+            } else if (route.name === 'Call') {
+              return <Ionicons name="call" size={size} color={color} />;
             } else if (route.name === 'Tutor') {
               return <Ionicons name="chatbubbles" size={size} color={color} />;
             } else if (route.name === 'Profile') {
@@ -74,6 +85,7 @@ function AppContent() {
       >
         <Tab.Screen name="Learn" component={HomeStack} />
         <Tab.Screen name="Custom" component={CustomStack} />
+        <Tab.Screen name="Call" component={RoleplayStack} />
         <Tab.Screen name="Tutor" component={ChatScreen} />
         <Tab.Screen name="Profile" component={ProfileScreen} />
       </Tab.Navigator>

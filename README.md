@@ -97,3 +97,8 @@ To test the app directly on your physical mobile phone using the Expo Go app:
    - **iOS:** Open your standard iPhone Camera app and scan the QR code. Tap the link to open it in Expo Go.
 
 The app will download the bundle to your phone and you can test the AI chat, UI, and voice features natively!
+
+### Important Note for Voice Calling Features
+The new 1-on-1 voice calling feature requires audio conversion.
+- **On Windows:** You must download and install [FFmpeg](https://ffmpeg.org/download.html) and add it to your System PATH for the backend `pydub` library to successfully process voice recordings.
+- **On Mac/Linux:** Install via `brew install ffmpeg` or `sudo apt install ffmpeg`.

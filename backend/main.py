@@ -1,3 +1,4 @@
+
 from fastapi import FastAPI, HTTPException, BackgroundTasks, Request
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import FileResponse
@@ -22,6 +23,7 @@ app.add_middleware(
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
+    expose_headers=["X-User-Text", "X-AI-Text"],
 )
 
 OPENROUTER_API_KEY = os.environ.get("OPENROUTER_API_KEY")
@@ -218,6 +220,113 @@ async def speak(request: Request, background_tasks: BackgroundTasks):
 @app.get("/api/curriculum")
 def get_language_curriculum(language: str = "Japanese"):
     return get_curriculum(language)
+
+
+
+from fastapi import UploadFile, File, Form
+import speech_recognition as sr
+from pydub import AudioSegment
+
+@app.post("/api/voice-call")
+async def voice_call(
+    background_tasks: BackgroundTasks,
+    audio: UploadFile = File(...),
+    language: str = Form("Japanese"),
+    scenario: str = Form("Friend"),
+    chat_history: str = Form("[]")  # Pass conversation history as JSON string
+):
+    """
+    Accepts user audio, transcribes it, queries OpenRouter acting as the 'scenario',
+    generates TTS audio, and returns both the AI text and audio.
+    """
+    import json
+    history = json.loads(chat_history)
+
+    # 1. Save uploaded audio to temp file
+    user_audio_tmp = tempfile.NamedTemporaryFile(delete=False, suffix=".m4a")
+    user_audio_tmp.write(await audio.read())
+    user_audio_tmp.close()
+
+    # 2. Convert to WAV for SpeechRecognition
+    wav_tmp = tempfile.NamedTemporaryFile(delete=False, suffix=".wav")
+    wav_tmp.close()
+
+    try:
+        # Convert audio (React Native usually records in m4a or caf) to wav
+        aud = AudioSegment.from_file(user_audio_tmp.name)
+        aud.export(wav_tmp.name, format="wav")
+
+        # 3. Transcribe Audio
+        recognizer = sr.Recognizer()
+        with sr.AudioFile(wav_tmp.name) as source:
+            audio_data = recognizer.record(source)
+            try:
+                # Use Google Web Speech API (Free)
+                # Specify language code (e.g. ja-JP or ko-KR)
+                lang_code = "ja-JP" if language.lower() == "japanese" else "ko-KR"
+                user_text = recognizer.recognize_google(audio_data, language=lang_code)
+            except sr.UnknownValueError:
+                user_text = "(Audio unintelligible)"
+            except sr.RequestError:
+                user_text = "(Error communicating with speech recognition service)"
+
+    except Exception as e:
+        print("Audio conversion/transcription failed:", e)
+        user_text = "(Failed to process audio)"
+    finally:
+        remove_file(user_audio_tmp.name)
+        remove_file(wav_tmp.name)
+
+    # 4. Prompt OpenRouter
+    system_prompt = f"You are a native {language} speaker roleplaying as a {scenario}. Engage in a natural, spoken 1-on-1 conversation. Keep your responses to 1-3 sentences maximum. Only output the spoken response."
+
+    messages = [{"role": "system", "content": system_prompt}]
+    messages.extend(history)
+    messages.append({"role": "user", "content": user_text})
+
+    headers = {
+        "Authorization": f"Bearer {OPENROUTER_API_KEY}",
+        "Content-Type": "application/json"
+    }
+
+    payload = {
+        "model": "openrouter/auto",
+        "messages": messages
+    }
+
+    ai_text = ""
+    try:
+        async with httpx.AsyncClient(timeout=45.0) as client:
+            response = await client.post("https://openrouter.ai/api/v1/chat/completions", headers=headers, json=payload)
+            response.raise_for_status()
+            data = response.json()
+            ai_text = data['choices'][0]['message']['content'].strip()
+    except Exception as e:
+        print(f"Error querying AI: {e}")
+        ai_text = "I'm sorry, I couldn't understand that right now."
+
+    # 5. Generate TTS for AI response
+    voice = "ja-JP-NanamiNeural" if language.lower() == "japanese" else "ko-KR-SunHiNeural"
+    ai_audio_tmp = tempfile.NamedTemporaryFile(delete=False, suffix=".mp3")
+    ai_audio_tmp.close()
+
+    try:
+        subprocess.run(["edge-tts", "--voice", voice, "--text", ai_text, "--write-media", ai_audio_tmp.name], check=True)
+        background_tasks.add_task(remove_file, ai_audio_tmp.name)
+
+        # Return a custom header with the transcribed user text and AI text
+        import urllib.parse
+        encoded_user_text = urllib.parse.quote(user_text)
+        encoded_ai_text = urllib.parse.quote(ai_text)
+
+        return FileResponse(
+            ai_audio_tmp.name,
+            media_type="audio/mpeg",
+            headers={"X-User-Text": encoded_user_text, "X-AI-Text": encoded_ai_text}
+        )
+    except Exception as e:
+        remove_file(ai_audio_tmp.name)
+        raise HTTPException(status_code=500, detail=str(e))
 
 if __name__ == "__main__":
     import uvicorn
