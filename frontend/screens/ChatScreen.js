@@ -128,7 +128,7 @@ export default function ChatScreen() {
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: '#F7F7F7' },
+  container: { flex: 1, backgroundColor: '#F9FAFB' },
   header: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -153,6 +153,6 @@ const styles = StyleSheet.create({
   textAi: { color: '#4B4B4B' },
   playButton: { marginTop: 10, alignSelf: 'flex-end' },
   inputArea: { flexDirection: 'row', padding: 15, backgroundColor: '#FFF', borderTopWidth: 2, borderColor: '#E5E5E5', alignItems: 'center' },
-  input: { flex: 1, backgroundColor: '#F7F7F7', borderWidth: 2, borderColor: '#E5E5E5', borderRadius: 24, paddingHorizontal: 20, paddingVertical: 10, fontSize: 16, marginRight: 10 },
+  input: { flex: 1, backgroundColor: '#F9FAFB', borderWidth: 2, borderColor: '#E5E5E5', borderRadius: 24, paddingHorizontal: 20, paddingVertical: 10, fontSize: 16, marginRight: 10 },
   sendBtn: { width: 48, height: 48, borderRadius: 24, backgroundColor: '#58CC02', justifyContent: 'center', alignItems: 'center', borderBottomWidth: 4, borderBottomColor: '#58A700' }
 });

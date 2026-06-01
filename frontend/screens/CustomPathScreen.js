@@ -29,6 +29,12 @@ export default function CustomPathScreen({ navigation }) {
   const [style, setStyle] = useState('Conversational');
   const [duration, setDuration] = useState('2 Weeks');
 
+  React.useEffect(() => {
+    fetch(`${API_URL}/api/progress`)
+      .then(res => res.json())
+      .then(data => setProgress(prev => ({...prev, xp: data.xp, streak: data.streak, hearts: data.hearts, gems: data.gems})))
+      .catch(err => console.log(err));
+  }, []);
   const generatePath = async () => {
     setLoading(true);
     try {

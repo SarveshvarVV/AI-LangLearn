@@ -50,6 +50,10 @@ export default function HomeScreen({ navigation }) {
           <Text style={[styles.stat, { color: '#1CB0F6' }]}>{progress.xp}</Text>
         </View>
         <View style={styles.statContainer}>
+        <View style={styles.statContainer}>
+          <FontAwesome5 name="gem" size={20} color="#1CB0F6" />
+          <Text style={[styles.stat, { color: '#1CB0F6' }]}>{progress.gems}</Text>
+        </View>
           <FontAwesome5 name="heart" size={20} color="#FF4B4B" solid />
           <Text style={[styles.stat, { color: '#FF4B4B' }]}>{progress.hearts}</Text>
         </View>
