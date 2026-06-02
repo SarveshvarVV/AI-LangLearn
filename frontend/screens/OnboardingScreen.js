@@ -1,53 +1,97 @@
 import React, { useContext } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, Image } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
 import { AppContext } from '../AppContext';
-import { FontAwesome5 } from '@expo/vector-icons';
+import { COLORS, SPACING, RADIUS, TYPE, SHADOW } from '../theme';
 
 export default function OnboardingScreen() {
   const { setLanguage } = useContext(AppContext);
 
+  const languages = [
+    { key: 'Japanese', flag: '🇯🇵', glyph: 'あ', sub: 'Hiragana → JLPT N5' },
+    { key: 'Korean', flag: '🇰🇷', glyph: '한', sub: 'Hangul → TOPIK I' },
+  ];
+
   return (
     <View style={styles.container}>
-      <View style={styles.headerContainer}>
-        <FontAwesome5 name="globe-americas" size={64} color="#1CB0F6" />
-        <Text style={styles.title}>What do you want to learn?</Text>
+      <View style={styles.header}>
+        <Text style={styles.brand}>AI-LangLearn</Text>
+        <Text style={styles.title}>Speak Japanese & Korean, for real.</Text>
+        <Text style={styles.subtitle}>
+          A calm, gamified path with a patient AI tutor that helps you actually talk —
+          not just tap tiles.
+        </Text>
       </View>
 
       <View style={styles.optionsContainer}>
-        <TouchableOpacity style={styles.langButton} onPress={() => setLanguage('Japanese')}>
-          <Text style={styles.flag}>🇯🇵</Text>
-          <Text style={styles.langText}>Japanese</Text>
-        </TouchableOpacity>
-
-        <TouchableOpacity style={styles.langButton} onPress={() => setLanguage('Korean')}>
-          <Text style={styles.flag}>🇰🇷</Text>
-          <Text style={styles.langText}>Korean</Text>
-        </TouchableOpacity>
+        {languages.map((lang) => (
+          <TouchableOpacity
+            key={lang.key}
+            style={styles.langButton}
+            activeOpacity={0.85}
+            onPress={() => setLanguage(lang.key)}
+          >
+            <View style={styles.glyphCircle}>
+              <Text style={styles.glyph}>{lang.glyph}</Text>
+            </View>
+            <View style={{ flex: 1 }}>
+              <Text style={styles.langText}>
+                {lang.flag}  {lang.key}
+              </Text>
+              <Text style={styles.langSub}>{lang.sub}</Text>
+            </View>
+          </TouchableOpacity>
+        ))}
       </View>
+
+      <Text style={styles.footnote}>Pick a language to start your first lesson</Text>
     </View>
   );
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: '#fff', alignItems: 'center', justifyContent: 'center', padding: 20 },
-  headerContainer: { alignItems: 'center', marginBottom: 50 },
-  title: { fontSize: 28, fontWeight: 'bold', color: '#4B4B4B', textAlign: 'center', marginTop: 20 },
+  container: {
+    flex: 1,
+    backgroundColor: COLORS.bg,
+    justifyContent: 'center',
+    padding: SPACING.lg,
+  },
+  header: { marginBottom: SPACING.xl },
+  brand: {
+    ...TYPE.label,
+    color: COLORS.primary,
+    letterSpacing: 1,
+    marginBottom: SPACING.md,
+  },
+  title: { ...TYPE.display, marginBottom: SPACING.sm },
+  subtitle: { ...TYPE.body, lineHeight: 24 },
   optionsContainer: { width: '100%' },
   langButton: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: '#fff',
-    borderWidth: 2,
-    borderColor: '#E5E5E5',
-    borderRadius: 16,
-    padding: 20,
-    marginBottom: 20,
-    elevation: 2,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 2,
+    backgroundColor: COLORS.surface,
+    borderWidth: 1,
+    borderColor: COLORS.border,
+    borderRadius: RADIUS.lg,
+    padding: SPACING.lg,
+    marginBottom: SPACING.md,
+    ...SHADOW.card,
   },
-  flag: { fontSize: 32, marginRight: 20 },
-  langText: { fontSize: 20, fontWeight: 'bold', color: '#4B4B4B' }
+  glyphCircle: {
+    width: 56,
+    height: 56,
+    borderRadius: RADIUS.md,
+    backgroundColor: COLORS.primarySoft,
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginRight: SPACING.md,
+  },
+  glyph: { fontSize: 28, color: COLORS.primaryDark, fontWeight: '600' },
+  langText: { ...TYPE.heading },
+  langSub: { ...TYPE.label, fontWeight: '400', marginTop: 2 },
+  footnote: {
+    ...TYPE.label,
+    fontWeight: '400',
+    textAlign: 'center',
+    marginTop: SPACING.xl,
+  },
 });

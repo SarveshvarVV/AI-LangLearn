@@ -1,13 +1,16 @@
-# AI Language Tutor MVP
+# AI-LangLearn
 
-An AI-powered language learning application that combines the structured, gamified learning experience of Duolingo with the flexibility of a 1-on-1 personalized AI tutor.
+An AI-powered Japanese & Korean learning app that combines Duolingo-style gamification with a free 1-on-1 AI tutor — the speaking practice Duolingo charges $168/yr for, given away free via OpenRouter.
+
+> **Strategy & design docs** live in [`/docs`](./docs): competitive brief, curriculum/learning path, deployment & build, and the AI/product spec. See [`ASSESSMENT.md`](./ASSESSMENT.md) for the full `Claude-Branch` changelog.
 
 ## Features
-- **Gamified Curriculum:** A visual "skill tree" or path outlining lessons.
-- **1-on-1 AI Tutor (Text & Voice):** A conversational interface using OpenRouter API to chat with an AI persona.
-- **Dynamic Study Plans:** Learn Japanese and Korean (expandable).
-- **Voice Pipeline:** Generates audio dynamically (via `edge-tts`) so the AI speaks to you.
-- **Gamification Mechanics:** Earn XP by chatting, track your streak, and view your current level.
+- **Read-first curriculum:** Section 0 teaches **Hiragana** and **Hangul** before vocabulary — the Day-1 "I can read!" hook.
+- **Spaced Repetition (SRS):** SM-2 engine schedules reviews for long-term retention (`/api/srs/*`).
+- **1-on-1 AI Tutor (Text & Voice):** Conversational practice via OpenRouter, with **automatic free-model fallback** to protect the free tier.
+- **Explain My Answer:** Free AI grammar explanations on wrong answers (`/api/explain`).
+- **Gamification:** XP, levels, daily streak + freeze (loss-aversion), gems.
+- **Premium UI:** Calm "Indigo & Sumi-ink" design system (`frontend/theme.js`), dark-ready.
 
 ---
 
@@ -102,3 +105,41 @@ The app will download the bundle to your phone and you can test the AI chat, UI,
 The new 1-on-1 voice calling feature requires audio conversion.
 - **On Windows:** You must download and install [FFmpeg](https://ffmpeg.org/download.html) and add it to your System PATH for the backend `pydub` library to successfully process voice recordings.
 - **On Mac/Linux:** Install via `brew install ffmpeg` or `sudo apt install ffmpeg`.
+
+---
+
+## 4. Running Tests
+
+```bash
+cd backend
+python3 -m pytest tests/ -q        # 15 tests: SRS, gamification, curriculum, model routing
+```
+
+---
+
+## 5. Hosting & App Builds (so testers don't need your laptop)
+
+A locally-hosted site only works while your laptop is on. For testers, host once and point the app at it.
+
+### A. Host the backend (free, always-on)
+Deploy `/backend` to **Render**, **Railway**, or **Fly.io** (free tier). Set the `OPENROUTER_API_KEY` env var there. You'll get a URL like `https://ai-langlearn-api.onrender.com`.
+
+### B. Deploy the web app (free, always-on — for you)
+Connect the repo to **Vercel** and build the Expo web export. Set `EXPO_PUBLIC_API_URL` to your hosted backend. Result: a permanent `https://…vercel.app` that's live with your laptop closed.
+
+### C. Build the Android APK (free, no gatekeeper)
+```bash
+npm i -g eas-cli && eas login
+cd frontend && eas init        # writes your projectId into app.json
+eas build -p android --profile preview   # → installable APK download link
+```
+Send testers the link; they enable "install from unknown sources" and install.
+
+### D. Build the iOS app (needs a paid Apple account)
+```bash
+eas build -p ios --profile preview        # cloud build, no Mac needed
+eas submit -p ios                          # upload to TestFlight
+```
+> iOS install on real devices requires an **Apple Developer account ($99/yr)** — Apple's rule, unavoidable. Until then, iOS testers use the web app (add-to-home-screen PWA).
+
+Set `EXPO_PUBLIC_API_URL` in `frontend/eas.json` (both profiles) before building.

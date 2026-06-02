@@ -11,6 +11,8 @@ import tempfile
 import subprocess
 from curriculum import get_curriculum
 from gamification import setup_db, get_db, calculate_streak, add_xp_and_adjust_proficiency, buy_streak_freeze
+from ai_config import build_payload, auth_headers, OPENROUTER_URL
+import srs
 
 load_dotenv()
 
@@ -43,8 +45,25 @@ class GeneratePathRequest(BaseModel):
     style: str
     duration: str
 
-# Setup gamified DB on start
+class ExplainRequest(BaseModel):
+    question: str
+    user_answer: str
+    correct_answer: str
+    language: str = "Japanese"
+
+class SrsAddRequest(BaseModel):
+    item: str
+    answer: str
+    language: str = "Japanese"
+    tag: str = "vocab"
+
+class SrsReviewRequest(BaseModel):
+    card_id: int
+    grade: str  # 'again' | 'hard' | 'good' | 'easy'
+
+# Setup gamified DB + SRS deck on start
 setup_db()
+srs.setup_srs_db()
 
 @app.get("/")
 def read_root():
@@ -84,23 +103,18 @@ async def chat(req: ChatRequest):
 
     system_prompt = f"You are a helpful language tutor teaching {req.language} to an English speaker. {difficulty_modifier} Keep your responses short, conversational, and provide the translation and romanization."
 
-    headers = {
-        "Authorization": f"Bearer {OPENROUTER_API_KEY}",
-        "Content-Type": "application/json"
-    }
-
-    payload = {
-        "model": "openrouter/auto",
-        "messages": [
+    headers = auth_headers(OPENROUTER_API_KEY)
+    payload = build_payload(
+        [
             {"role": "system", "content": system_prompt},
-            {"role": "user", "content": req.message}
+            {"role": "user", "content": req.message},
         ]
-    }
+    )
 
     # Asynchronous request to OpenRouter to lower backend thread latency (Optimization)
     try:
         async with httpx.AsyncClient(timeout=30.0) as client:
-            response = await client.post("https://openrouter.ai/api/v1/chat/completions", headers=headers, json=payload)
+            response = await client.post(OPENROUTER_URL, headers=headers, json=payload)
             response.raise_for_status()
             data = response.json()
 
@@ -140,22 +154,17 @@ async def generate_custom_path(req: GeneratePathRequest):
     ]
     """
 
-    headers = {
-        "Authorization": f"Bearer {OPENROUTER_API_KEY}",
-        "Content-Type": "application/json"
-    }
-
-    payload = {
-        "model": "openrouter/auto",
-        "messages": [
+    headers = auth_headers(OPENROUTER_API_KEY)
+    payload = build_payload(
+        [
             {"role": "system", "content": system_prompt},
-            {"role": "user", "content": user_prompt}
+            {"role": "user", "content": user_prompt},
         ]
-    }
+    )
 
     try:
         async with httpx.AsyncClient(timeout=45.0) as client:
-            response = await client.post("https://openrouter.ai/api/v1/chat/completions", headers=headers, json=payload)
+            response = await client.post(OPENROUTER_URL, headers=headers, json=payload)
             response.raise_for_status()
             data = response.json()
             ai_text = data['choices'][0]['message']['content'].strip()
@@ -222,6 +231,81 @@ def get_language_curriculum(language: str = "Japanese"):
     return get_curriculum(language)
 
 
+@app.post("/api/explain")
+async def explain_answer(req: ExplainRequest):
+    """
+    'Explain my answer' — the free AI grammar tutor. Duolingo charges for this via
+    Max; we give it away. Uses the FAST (cheap) free-model pool with a tight token
+    cap so it's high-volume-safe on the free tier.
+    """
+    system_prompt = (
+        f"You are a concise {req.language} tutor for an English-speaking beginner. "
+        "In 2-3 short sentences, gently explain why the learner's answer was wrong "
+        "and why the correct answer is right. Be encouraging and simple."
+    )
+    user_prompt = (
+        f"Question: {req.question}\n"
+        f"Learner answered: {req.user_answer}\n"
+        f"Correct answer: {req.correct_answer}\n"
+        "Explain briefly."
+    )
+    headers = auth_headers(OPENROUTER_API_KEY)
+    payload = build_payload(
+        [
+            {"role": "system", "content": system_prompt},
+            {"role": "user", "content": user_prompt},
+        ],
+        fast=True,
+        max_tokens=140,
+    )
+    try:
+        async with httpx.AsyncClient(timeout=30.0) as client:
+            response = await client.post(OPENROUTER_URL, headers=headers, json=payload)
+            response.raise_for_status()
+            data = response.json()
+            return {"explanation": data["choices"][0]["message"]["content"].strip()}
+    except Exception as e:
+        # Graceful fallback so the UI never hard-fails on a rate limit.
+        return {
+            "explanation": (
+                f"The correct answer is \"{req.correct_answer}\". "
+                "Review the prompt and try saying it aloud a couple of times."
+            ),
+            "fallback": True,
+        }
+
+
+# ---------------- SRS (Spaced Repetition) ----------------
+
+@app.post("/api/srs/add")
+def srs_add(req: SrsAddRequest):
+    srs.add_card(req.item, req.answer, req.language, req.tag)
+    return {"success": True}
+
+
+@app.get("/api/srs/due")
+def srs_due(language: str = None, limit: int = 20):
+    return {
+        "cards": srs.get_due_cards(language=language, limit=limit),
+        "stats": srs.deck_stats(language=language),
+    }
+
+
+@app.post("/api/srs/review")
+def srs_review(req: SrsReviewRequest):
+    updated = srs.review_card(req.card_id, req.grade)
+    if not updated:
+        raise HTTPException(status_code=404, detail="Card not found")
+    # Reviewing is learning — award a little XP to reinforce the habit.
+    add_xp_and_adjust_proficiency(5, req.grade != "again")
+    return {"success": True, "card": updated}
+
+
+@app.get("/api/srs/stats")
+def srs_stats(language: str = None):
+    return srs.deck_stats(language=language)
+
+
 
 from fastapi import UploadFile, File, Form
 import speech_recognition as sr
@@ -284,20 +368,14 @@ async def voice_call(
     messages.extend(history)
     messages.append({"role": "user", "content": user_text})
 
-    headers = {
-        "Authorization": f"Bearer {OPENROUTER_API_KEY}",
-        "Content-Type": "application/json"
-    }
-
-    payload = {
-        "model": "openrouter/auto",
-        "messages": messages
-    }
+    headers = auth_headers(OPENROUTER_API_KEY)
+    # Conversation: cap tokens so a single call stays light on the free tier.
+    payload = build_payload(messages, max_tokens=160)
 
     ai_text = ""
     try:
         async with httpx.AsyncClient(timeout=45.0) as client:
-            response = await client.post("https://openrouter.ai/api/v1/chat/completions", headers=headers, json=payload)
+            response = await client.post(OPENROUTER_URL, headers=headers, json=payload)
             response.raise_for_status()
             data = response.json()
             ai_text = data['choices'][0]['message']['content'].strip()

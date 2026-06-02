@@ -90,7 +90,7 @@ export default function LessonScreen({ navigation, route }) {
     <View style={styles.container}>
       <View style={styles.header}>
         <TouchableOpacity onPress={() => navigation.goBack()}>
-          <FontAwesome5 name="times" size={24} color="#AFAFAF" />
+          <FontAwesome5 name="times" size={24} color="#8A8F98" />
         </TouchableOpacity>
         <View style={styles.progressBar}>
           <View style={[styles.progressFill, { width: '50%' }]} />
@@ -121,11 +121,11 @@ export default function LessonScreen({ navigation, route }) {
 
               if (result && isSelected) {
                   if (result === 'correct') {
-                      optionStyle.push({ backgroundColor: '#D7FFB8', borderColor: '#58A700' });
-                      optionTextStyle.push({ color: '#58A700' });
+                      optionStyle.push({ backgroundColor: '#DDF3E8', borderColor: '#1E8A5B' });
+                      optionTextStyle.push({ color: '#1E8A5B' });
                   } else {
-                      optionStyle.push({ backgroundColor: '#FFDFE0', borderColor: '#EA2B2B' });
-                      optionTextStyle.push({ color: '#EA2B2B' });
+                      optionStyle.push({ backgroundColor: '#FBE3E4', borderColor: '#C62A2F' });
+                      optionTextStyle.push({ color: '#C62A2F' });
                   }
               }
 
@@ -145,26 +145,26 @@ export default function LessonScreen({ navigation, route }) {
 
       <View style={styles.footer}>
         {result === 'correct' && (
-          <View style={[styles.resultBanner, { backgroundColor: '#D7FFB8' }]}>
+          <View style={[styles.resultBanner, { backgroundColor: '#DDF3E8' }]}>
             <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-               <FontAwesome5 name="check-circle" size={24} color="#58A700" solid style={{ marginRight: 10 }} />
-               <Text style={[styles.resultText, { color: '#58A700' }]}>Correct! (+{lessonData.xp} XP)</Text>
+               <FontAwesome5 name="check-circle" size={24} color="#1E8A5B" solid style={{ marginRight: 10 }} />
+               <Text style={[styles.resultText, { color: '#1E8A5B' }]}>Correct! (+{lessonData.xp} XP)</Text>
             </View>
             <View style={styles.dialogueRow}>
-               <Ionicons name="volume-medium" size={20} color="#58A700" style={{marginRight: 5}} />
-               <Text style={[styles.dialogueText, { color: '#58A700' }]}>{lessonData.success_dialogue}</Text>
+               <Ionicons name="volume-medium" size={20} color="#1E8A5B" style={{marginRight: 5}} />
+               <Text style={[styles.dialogueText, { color: '#1E8A5B' }]}>{lessonData.success_dialogue}</Text>
             </View>
           </View>
         )}
         {result === 'incorrect' && (
-          <View style={[styles.resultBanner, { backgroundColor: '#FFDFE0' }]}>
+          <View style={[styles.resultBanner, { backgroundColor: '#FBE3E4' }]}>
             <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-               <FontAwesome5 name="times-circle" size={24} color="#EA2B2B" solid style={{ marginRight: 10 }} />
-               <Text style={[styles.resultText, { color: '#EA2B2B' }]}>Incorrect.</Text>
+               <FontAwesome5 name="times-circle" size={24} color="#C62A2F" solid style={{ marginRight: 10 }} />
+               <Text style={[styles.resultText, { color: '#C62A2F' }]}>Incorrect.</Text>
             </View>
             <View style={styles.dialogueRow}>
-               <Ionicons name="volume-medium" size={20} color="#EA2B2B" style={{marginRight: 5}} />
-               <Text style={[styles.dialogueText, { color: '#EA2B2B' }]}>{lessonData.fail_dialogue}</Text>
+               <Ionicons name="volume-medium" size={20} color="#C62A2F" style={{marginRight: 5}} />
+               <Text style={[styles.dialogueText, { color: '#C62A2F' }]}>{lessonData.fail_dialogue}</Text>
             </View>
           </View>
         )}
@@ -172,14 +172,14 @@ export default function LessonScreen({ navigation, route }) {
         <TouchableOpacity
           style={[
             styles.checkBtn,
-            !selectedOption && { backgroundColor: '#E5E5E5', borderBottomColor: '#E5E5E5' },
-            result === 'correct' && { backgroundColor: '#58CC02', borderBottomColor: '#58A700' },
-            result === 'incorrect' && { backgroundColor: '#FF4B4B', borderBottomColor: '#EA2B2B' }
+            !selectedOption && { backgroundColor: '#E6E3DA', borderBottomColor: '#E6E3DA' },
+            result === 'correct' && { backgroundColor: '#2FB67A', borderBottomColor: '#1E8A5B' },
+            result === 'incorrect' && { backgroundColor: '#E5484D', borderBottomColor: '#C62A2F' }
           ]}
           disabled={!selectedOption || isSpeaking}
           onPress={result ? () => navigation.goBack() : checkAnswer}
         >
-          <Text style={[styles.checkBtnText, !selectedOption && { color: '#AFAFAF' }]}>
+          <Text style={[styles.checkBtnText, !selectedOption && { color: '#8A8F98' }]}>
             {result ? "CONTINUE" : "CHECK"}
           </Text>
         </TouchableOpacity>
@@ -191,40 +191,40 @@ export default function LessonScreen({ navigation, route }) {
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: '#FFF' },
   header: { flexDirection: 'row', alignItems: 'center', padding: 20, paddingTop: 50 },
-  progressBar: { flex: 1, height: 16, backgroundColor: '#E5E5E5', borderRadius: 8, marginLeft: 20 },
-  progressFill: { height: '100%', backgroundColor: '#58CC02', borderRadius: 8 },
-  title: { fontSize: 24, fontWeight: 'bold', color: '#4B4B4B', paddingHorizontal: 20, marginBottom: 10 },
+  progressBar: { flex: 1, height: 16, backgroundColor: '#E6E3DA', borderRadius: 8, marginLeft: 20 },
+  progressFill: { height: '100%', backgroundColor: '#2FB67A', borderRadius: 8 },
+  title: { fontSize: 24, fontWeight: 'bold', color: '#1F2430', paddingHorizontal: 20, marginBottom: 10 },
   personaCard: { flexDirection: 'row', padding: 20, alignItems: 'flex-start' },
-  personaAvatar: { width: 70, height: 70, borderRadius: 35, backgroundColor: '#CE82FF', justifyContent: 'center', alignItems: 'center', marginRight: 15, borderWidth: 3, borderColor: '#A568CC' },
-  personaTextBubble: { flex: 1, backgroundColor: '#F7F7F7', padding: 15, borderRadius: 16, borderWidth: 2, borderColor: '#E5E5E5' },
-  personaName: { fontSize: 14, fontWeight: 'bold', color: '#AFAFAF', marginBottom: 5 },
-  questionText: { fontSize: 18, color: '#4B4B4B', fontWeight: '500' },
+  personaAvatar: { width: 70, height: 70, borderRadius: 35, backgroundColor: '#8B5CF6', justifyContent: 'center', alignItems: 'center', marginRight: 15, borderWidth: 3, borderColor: '#6D28D9' },
+  personaTextBubble: { flex: 1, backgroundColor: '#FAF9F5', padding: 15, borderRadius: 16, borderWidth: 2, borderColor: '#E6E3DA' },
+  personaName: { fontSize: 14, fontWeight: 'bold', color: '#8A8F98', marginBottom: 5 },
+  questionText: { fontSize: 18, color: '#1F2430', fontWeight: '500' },
   optionsContainer: { paddingHorizontal: 20, marginTop: 10 },
   optionBtn: {
     borderWidth: 2,
-    borderColor: '#E5E5E5',
+    borderColor: '#E6E3DA',
     borderRadius: 16,
     padding: 18,
     marginBottom: 15,
     borderBottomWidth: 4,
   },
   optionBtnSelected: {
-    borderColor: '#84D8FF',
-    backgroundColor: '#DDF4FF',
+    borderColor: '#A5A3F0',
+    backgroundColor: '#ECEBFB',
   },
-  optionText: { fontSize: 18, color: '#4B4B4B', textAlign: 'center', fontWeight: 'bold' },
-  optionTextSelected: { color: '#1CB0F6' },
-  footer: { position: 'absolute', bottom: 0, width: '100%', borderTopWidth: 2, borderColor: '#E5E5E5', padding: 20, backgroundColor: '#FFF' },
+  optionText: { fontSize: 18, color: '#1F2430', textAlign: 'center', fontWeight: 'bold' },
+  optionTextSelected: { color: '#4F46E5' },
+  footer: { position: 'absolute', bottom: 0, width: '100%', borderTopWidth: 2, borderColor: '#E6E3DA', padding: 20, backgroundColor: '#FFF' },
   resultBanner: { padding: 15, borderRadius: 16, marginBottom: 15 },
   resultText: { fontSize: 20, fontWeight: 'bold' },
   dialogueRow: { flexDirection: 'row', marginTop: 10, alignItems: 'center' },
   dialogueText: { fontSize: 16, fontWeight: '500', flexShrink: 1 },
   checkBtn: {
-    backgroundColor: '#58CC02',
+    backgroundColor: '#2FB67A',
     padding: 18,
     borderRadius: 16,
     borderBottomWidth: 4,
-    borderBottomColor: '#58A700',
+    borderBottomColor: '#1E8A5B',
     alignItems: 'center'
   },
   checkBtnText: { color: '#FFF', fontSize: 18, fontWeight: 'bold' }

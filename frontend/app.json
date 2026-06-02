@@ -1,17 +1,24 @@
 {
   "expo": {
-    "name": "frontend",
-    "slug": "frontend",
+    "name": "AI-LangLearn",
+    "slug": "ai-langlearn",
+    "scheme": "ailanglearn",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
-    "userInterfaceStyle": "light",
+    "userInterfaceStyle": "automatic",
     "ios": {
-      "supportsTablet": true
+      "supportsTablet": true,
+      "bundleIdentifier": "com.ailanglearn.app",
+      "infoPlist": {
+        "NSMicrophoneUsageDescription": "AI-LangLearn uses your microphone for 1-on-1 speaking practice with the AI tutor."
+      }
     },
     "android": {
+      "package": "com.ailanglearn.app",
+      "permissions": ["RECORD_AUDIO"],
       "adaptiveIcon": {
-        "backgroundColor": "#E6F4FE",
+        "backgroundColor": "#ECEBFB",
         "foregroundImage": "./assets/android-icon-foreground.png",
         "backgroundImage": "./assets/android-icon-background.png",
         "monochromeImage": "./assets/android-icon-monochrome.png"
@@ -19,6 +26,11 @@
     },
     "web": {
       "favicon": "./assets/favicon.png"
+    },
+    "extra": {
+      "eas": {
+        "projectId": "REPLACE_WITH_EAS_PROJECT_ID_AFTER_eas_init"
+      }
     }
   }
 }

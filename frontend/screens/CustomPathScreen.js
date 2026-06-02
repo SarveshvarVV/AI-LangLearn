@@ -12,12 +12,12 @@ const getStaggeredMargin = (index) => {
 };
 
 const getDarker = (hex) => {
-  if (hex === '#58CC02') return '#58A700';
-  if (hex === '#CE82FF') return '#A568CC';
-  if (hex === '#1CB0F6') return '#1899D6';
-  if (hex === '#FF9600') return '#CC7800';
-  if (hex === '#FF4B4B') return '#EA2B2B';
-  return '#C4C4C4';
+  if (hex === '#2FB67A') return '#1E8A5B';
+  if (hex === '#8B5CF6') return '#6D28D9';
+  if (hex === '#4F46E5') return '#3730A3';
+  if (hex === '#F59E0B') return '#B45309';
+  if (hex === '#E5484D') return '#C62A2F';
+  return '#D8D3C6';
 };
 
 export default function CustomPathScreen({ navigation }) {
@@ -55,7 +55,7 @@ export default function CustomPathScreen({ navigation }) {
   if (loading) {
     return (
       <View style={styles.loadingContainer}>
-        <ActivityIndicator size="large" color="#1CB0F6" />
+        <ActivityIndicator size="large" color="#4F46E5" />
         <Text style={styles.loadingText}>Crafting your custom {language} journey...</Text>
       </View>
     );
@@ -66,7 +66,7 @@ export default function CustomPathScreen({ navigation }) {
     return (
       <ScrollView style={styles.wizardContainer} contentContainerStyle={{ paddingBottom: 100 }}>
         <View style={styles.wizardHeader}>
-           <FontAwesome5 name="magic" size={40} color="#CE82FF" />
+           <FontAwesome5 name="magic" size={40} color="#8B5CF6" />
            <Text style={styles.wizardTitle}>Custom Track</Text>
            <Text style={styles.wizardSub}>Personalize your learning experience.</Text>
         </View>
@@ -121,15 +121,15 @@ export default function CustomPathScreen({ navigation }) {
            <Text style={styles.recreateBtnText}>New Path</Text>
         </TouchableOpacity>
         <View style={styles.statContainer}>
-          <FontAwesome5 name="gem" size={20} color="#1CB0F6" />
-          <Text style={[styles.stat, { color: '#1CB0F6' }]}>{progress.xp}</Text>
+          <FontAwesome5 name="gem" size={20} color="#4F46E5" />
+          <Text style={[styles.stat, { color: '#4F46E5' }]}>{progress.xp}</Text>
         </View>
       </View>
 
       <ScrollView contentContainerStyle={styles.path}>
         {customPath.map((moduleData, modIndex) => (
           <View key={`cmod-${modIndex}`} style={styles.moduleContainer}>
-            <View style={[styles.moduleHeader, { backgroundColor: '#CE82FF', borderBottomColor: '#A568CC' }]}>
+            <View style={[styles.moduleHeader, { backgroundColor: '#8B5CF6', borderBottomColor: '#6D28D9' }]}>
                <Text style={styles.moduleTitle}>{moduleData.module}</Text>
             </View>
 
@@ -137,7 +137,7 @@ export default function CustomPathScreen({ navigation }) {
               const marginLeft = getStaggeredMargin(nodeCounter);
               nodeCounter++;
 
-              const color = "#FF9600";
+              const color = "#F59E0B";
               const icon = "star";
 
               return (
@@ -166,26 +166,26 @@ export default function CustomPathScreen({ navigation }) {
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: '#FFFFFF' },
   loadingContainer: { flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: '#FFF' },
-  loadingText: { marginTop: 20, fontSize: 18, color: '#4B4B4B', fontWeight: 'bold' },
+  loadingText: { marginTop: 20, fontSize: 18, color: '#1F2430', fontWeight: 'bold' },
 
   // Wizard Styles
   wizardContainer: { flex: 1, backgroundColor: '#FFFFFF', paddingTop: 50 },
   wizardHeader: { alignItems: 'center', padding: 20, marginBottom: 10 },
-  wizardTitle: { fontSize: 28, fontWeight: 'bold', color: '#4B4B4B', marginTop: 10 },
-  wizardSub: { fontSize: 16, color: '#AFAFAF', marginTop: 5 },
+  wizardTitle: { fontSize: 28, fontWeight: 'bold', color: '#1F2430', marginTop: 10 },
+  wizardSub: { fontSize: 16, color: '#8A8F98', marginTop: 5 },
   questionSection: { paddingHorizontal: 20, marginBottom: 25 },
-  questionTitle: { fontSize: 18, fontWeight: 'bold', color: '#4B4B4B', marginBottom: 15 },
+  questionTitle: { fontSize: 18, fontWeight: 'bold', color: '#1F2430', marginBottom: 15 },
   optionsRow: { flexDirection: 'row', flexWrap: 'wrap', justifyContent: 'space-between' },
-  optionBtn: { width: '48%', borderWidth: 2, borderColor: '#E5E5E5', borderRadius: 16, padding: 15, marginBottom: 10, alignItems: 'center', borderBottomWidth: 4 },
-  optionBtnSelected: { borderColor: '#84D8FF', backgroundColor: '#DDF4FF' },
-  optionText: { fontSize: 16, color: '#4B4B4B', fontWeight: 'bold' },
-  optionTextSelected: { color: '#1CB0F6' },
-  generateBtn: { marginHorizontal: 20, backgroundColor: '#CE82FF', padding: 18, borderRadius: 16, borderBottomWidth: 4, borderBottomColor: '#A568CC', alignItems: 'center', marginTop: 10 },
+  optionBtn: { width: '48%', borderWidth: 2, borderColor: '#E6E3DA', borderRadius: 16, padding: 15, marginBottom: 10, alignItems: 'center', borderBottomWidth: 4 },
+  optionBtnSelected: { borderColor: '#A5A3F0', backgroundColor: '#ECEBFB' },
+  optionText: { fontSize: 16, color: '#1F2430', fontWeight: 'bold' },
+  optionTextSelected: { color: '#4F46E5' },
+  generateBtn: { marginHorizontal: 20, backgroundColor: '#8B5CF6', padding: 18, borderRadius: 16, borderBottomWidth: 4, borderBottomColor: '#6D28D9', alignItems: 'center', marginTop: 10 },
   generateBtnText: { color: '#FFF', fontSize: 18, fontWeight: 'bold' },
 
   // Path Styles
-  topBar: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', paddingHorizontal: 20, paddingTop: 50, paddingBottom: 15, backgroundColor: '#FFF', borderBottomWidth: 2, borderColor: '#E5E5E5', zIndex: 10 },
-  recreateBtn: { flexDirection: 'row', alignItems: 'center', backgroundColor: '#FF4B4B', paddingHorizontal: 12, paddingVertical: 8, borderRadius: 12 },
+  topBar: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', paddingHorizontal: 20, paddingTop: 50, paddingBottom: 15, backgroundColor: '#FFF', borderBottomWidth: 2, borderColor: '#E6E3DA', zIndex: 10 },
+  recreateBtn: { flexDirection: 'row', alignItems: 'center', backgroundColor: '#E5484D', paddingHorizontal: 12, paddingVertical: 8, borderRadius: 12 },
   recreateBtnText: { color: '#FFF', fontWeight: 'bold', marginLeft: 5 },
   statContainer: { flexDirection: 'row', alignItems: 'center' },
   stat: { fontSize: 16, fontWeight: 'bold', marginLeft: 8 },
@@ -195,5 +195,5 @@ const styles = StyleSheet.create({
   moduleTitle: { color: '#FFF', fontSize: 20, fontWeight: 'bold' },
   nodeWrapper: { alignItems: 'center', marginVertical: 15 },
   node: { width: 80, height: 80, borderRadius: 40, justifyContent: 'center', alignItems: 'center', borderWidth: 0, borderBottomWidth: 6 },
-  nodeTitle: { marginTop: 10, fontSize: 16, fontWeight: 'bold', color: '#4B4B4B' }
+  nodeTitle: { marginTop: 10, fontSize: 16, fontWeight: 'bold', color: '#1F2430' }
 });

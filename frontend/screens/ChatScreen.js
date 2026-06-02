@@ -82,7 +82,7 @@ export default function ChatScreen() {
   return (
     <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : 'height'} style={styles.container}>
       <View style={styles.header}>
-        <FontAwesome5 name="robot" size={24} color="#1CB0F6" />
+        <FontAwesome5 name="robot" size={24} color="#4F46E5" />
         <Text style={styles.headerTitle}>{language} Tutor</Text>
       </View>
 
@@ -96,7 +96,7 @@ export default function ChatScreen() {
                 <Text style={[styles.messageText, isUser ? styles.textUser : styles.textAi]}>{m.content}</Text>
                 {!isUser && (
                    <TouchableOpacity onPress={() => playVoice(m.content)} style={styles.playButton}>
-                      <Ionicons name="volume-medium" size={20} color="#1CB0F6" />
+                      <Ionicons name="volume-medium" size={20} color="#4F46E5" />
                    </TouchableOpacity>
                 )}
               </View>
@@ -117,7 +117,7 @@ export default function ChatScreen() {
           value={input}
           onChangeText={setInput}
           placeholder="Ask a question..."
-          placeholderTextColor="#AFAFAF"
+          placeholderTextColor="#8A8F98"
         />
         <TouchableOpacity style={styles.sendBtn} onPress={sendMessage}>
           <Ionicons name="send" size={20} color="#FFF" />
@@ -128,7 +128,7 @@ export default function ChatScreen() {
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: '#F9FAFB' },
+  container: { flex: 1, backgroundColor: '#FAF9F5' },
   header: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -137,22 +137,22 @@ const styles = StyleSheet.create({
     paddingTop: 50,
     backgroundColor: '#FFF',
     borderBottomWidth: 2,
-    borderColor: '#E5E5E5'
+    borderColor: '#E6E3DA'
   },
-  headerTitle: { fontSize: 20, fontWeight: 'bold', color: '#4B4B4B', marginLeft: 10 },
+  headerTitle: { fontSize: 20, fontWeight: 'bold', color: '#1F2430', marginLeft: 10 },
   chatArea: { flex: 1, padding: 15 },
   messageWrapper: { flexDirection: 'row', alignItems: 'flex-end', marginBottom: 15 },
   wrapperUser: { justifyContent: 'flex-end' },
   wrapperAi: { justifyContent: 'flex-start' },
-  avatar: { width: 36, height: 36, borderRadius: 18, backgroundColor: '#1CB0F6', justifyContent: 'center', alignItems: 'center', marginRight: 10 },
+  avatar: { width: 36, height: 36, borderRadius: 18, backgroundColor: '#4F46E5', justifyContent: 'center', alignItems: 'center', marginRight: 10 },
   messageBubble: { maxWidth: '75%', padding: 15, borderRadius: 20 },
-  bubbleUser: { backgroundColor: '#1CB0F6', borderBottomRightRadius: 5 },
-  bubbleAi: { backgroundColor: '#FFF', borderWidth: 2, borderColor: '#E5E5E5', borderBottomLeftRadius: 5 },
+  bubbleUser: { backgroundColor: '#4F46E5', borderBottomRightRadius: 5 },
+  bubbleAi: { backgroundColor: '#FFF', borderWidth: 2, borderColor: '#E6E3DA', borderBottomLeftRadius: 5 },
   messageText: { fontSize: 16 },
   textUser: { color: '#FFF' },
-  textAi: { color: '#4B4B4B' },
+  textAi: { color: '#1F2430' },
   playButton: { marginTop: 10, alignSelf: 'flex-end' },
-  inputArea: { flexDirection: 'row', padding: 15, backgroundColor: '#FFF', borderTopWidth: 2, borderColor: '#E5E5E5', alignItems: 'center' },
-  input: { flex: 1, backgroundColor: '#F9FAFB', borderWidth: 2, borderColor: '#E5E5E5', borderRadius: 24, paddingHorizontal: 20, paddingVertical: 10, fontSize: 16, marginRight: 10 },
-  sendBtn: { width: 48, height: 48, borderRadius: 24, backgroundColor: '#58CC02', justifyContent: 'center', alignItems: 'center', borderBottomWidth: 4, borderBottomColor: '#58A700' }
+  inputArea: { flexDirection: 'row', padding: 15, backgroundColor: '#FFF', borderTopWidth: 2, borderColor: '#E6E3DA', alignItems: 'center' },
+  input: { flex: 1, backgroundColor: '#FAF9F5', borderWidth: 2, borderColor: '#E6E3DA', borderRadius: 24, paddingHorizontal: 20, paddingVertical: 10, fontSize: 16, marginRight: 10 },
+  sendBtn: { width: 48, height: 48, borderRadius: 24, backgroundColor: '#2FB67A', justifyContent: 'center', alignItems: 'center', borderBottomWidth: 4, borderBottomColor: '#1E8A5B' }
 });

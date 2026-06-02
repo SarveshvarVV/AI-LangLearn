@@ -70,16 +70,19 @@ function AppContent() {
               return <FontAwesome5 name="user-alt" size={size} color={color} />;
             }
           },
-          tabBarActiveTintColor: '#1CB0F6',
-          tabBarInactiveTintColor: '#AFAFAF',
+          tabBarActiveTintColor: '#4F46E5',
+          tabBarInactiveTintColor: '#8A8F98',
           tabBarStyle: {
-            borderTopWidth: 2,
-            borderColor: '#E5E5E5',
-            paddingBottom: 5,
-            height: 60,
+            backgroundColor: '#FFFFFF',
+            borderTopWidth: 1,
+            borderColor: '#E6E3DA',
+            paddingBottom: 6,
+            paddingTop: 6,
+            height: 62,
           },
           tabBarLabelStyle: {
-            fontWeight: 'bold',
+            fontWeight: '600',
+            fontSize: 11,
           }
         })}
       >

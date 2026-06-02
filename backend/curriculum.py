@@ -1,4 +1,5 @@
 # Hardcoded structured curriculum based on user provided images
+from scripts_curriculum import JAPANESE_SCRIPT, KOREAN_SCRIPT
 
 JAPANESE_CURRICULUM = [
     {
@@ -191,8 +192,9 @@ KOREAN_CURRICULUM = [
 ]
 
 def get_curriculum(language: str):
+    # Section 0 (script) is prepended so beginners learn to READ before vocab.
     if language.lower() == "japanese":
-        return JAPANESE_CURRICULUM
+        return JAPANESE_SCRIPT + JAPANESE_CURRICULUM
     elif language.lower() == "korean":
-        return KOREAN_CURRICULUM
+        return KOREAN_SCRIPT + KOREAN_CURRICULUM
     return []

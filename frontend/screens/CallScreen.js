@@ -161,7 +161,7 @@ export default function CallScreen({ navigation, route }) {
     <View style={styles.container}>
       <View style={styles.header}>
         <TouchableOpacity onPress={() => navigation.goBack()}>
-          <FontAwesome5 name="chevron-left" size={24} color="#AFAFAF" />
+          <FontAwesome5 name="chevron-left" size={24} color="#8A8F98" />
         </TouchableOpacity>
         <Text style={styles.headerTitle}>{scenario.title}</Text>
         <View style={{ width: 24 }} />
@@ -201,22 +201,22 @@ export default function CallScreen({ navigation, route }) {
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: '#1A1A1A' },
+  container: { flex: 1, backgroundColor: '#14161C' },
   header: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', padding: 20, paddingTop: 50 },
   headerTitle: { color: '#FFF', fontSize: 18, fontWeight: 'bold' },
   callVisualizer: { alignItems: 'center', paddingVertical: 30 },
-  avatar: { width: 120, height: 120, borderRadius: 60, backgroundColor: '#1CB0F6', justifyContent: 'center', alignItems: 'center', borderWidth: 4, borderColor: '#FFF', marginBottom: 15 },
+  avatar: { width: 120, height: 120, borderRadius: 60, backgroundColor: '#4F46E5', justifyContent: 'center', alignItems: 'center', borderWidth: 4, borderColor: '#FFF', marginBottom: 15 },
   personaName: { color: '#FFF', fontSize: 24, fontWeight: 'bold' },
-  callStatus: { color: '#58CC02', fontSize: 16, marginTop: 5 },
+  callStatus: { color: '#2FB67A', fontSize: 16, marginTop: 5 },
   transcript: { flex: 1, padding: 20 },
   bubble: { maxWidth: '80%', padding: 15, borderRadius: 20, marginBottom: 15 },
-  bubbleUser: { backgroundColor: '#1CB0F6', alignSelf: 'flex-end', borderBottomRightRadius: 5 },
-  bubbleAi: { backgroundColor: '#333', alignSelf: 'flex-start', borderBottomLeftRadius: 5 },
+  bubbleUser: { backgroundColor: '#4F46E5', alignSelf: 'flex-end', borderBottomRightRadius: 5 },
+  bubbleAi: { backgroundColor: '#2A2D36', alignSelf: 'flex-start', borderBottomLeftRadius: 5 },
   bubbleText: { fontSize: 16 },
   textUser: { color: '#FFF' },
   textAi: { color: '#FFF' },
-  controls: { padding: 30, alignItems: 'center', borderTopWidth: 1, borderColor: '#333' },
-  micButton: { width: 80, height: 80, borderRadius: 40, backgroundColor: '#1CB0F6', justifyContent: 'center', alignItems: 'center', shadowColor: '#1CB0F6', shadowOpacity: 0.5, shadowRadius: 10, shadowOffset: { width: 0, height: 0 } },
-  micButtonActive: { backgroundColor: '#FF4B4B', shadowColor: '#FF4B4B', transform: [{ scale: 1.1 }] },
-  helperText: { color: '#AFAFAF', marginTop: 15, fontSize: 16 }
+  controls: { padding: 30, alignItems: 'center', borderTopWidth: 1, borderColor: '#2A2D36' },
+  micButton: { width: 80, height: 80, borderRadius: 40, backgroundColor: '#4F46E5', justifyContent: 'center', alignItems: 'center', shadowColor: '#4F46E5', shadowOpacity: 0.5, shadowRadius: 10, shadowOffset: { width: 0, height: 0 } },
+  micButtonActive: { backgroundColor: '#E5484D', shadowColor: '#E5484D', transform: [{ scale: 1.1 }] },
+  helperText: { color: '#8A8F98', marginTop: 15, fontSize: 16 }
 });
