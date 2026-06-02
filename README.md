@@ -5,12 +5,36 @@ An AI-powered Japanese & Korean learning app that combines Duolingo-style gamifi
 > **Strategy & design docs** live in [`/docs`](./docs): competitive brief, curriculum/learning path, deployment & build, and the AI/product spec. See [`ASSESSMENT.md`](./ASSESSMENT.md) for the full `Claude-Branch` changelog.
 
 ## Features
+
+**Learning**
 - **Read-first curriculum:** Section 0 teaches **Hiragana** and **Hangul** before vocabulary — the Day-1 "I can read!" hook.
+- **Preset learning path:** a clear, gamified path per language (Japanese, Korean → JLPT N5 / TOPIK I).
+- **Adaptive path:** the path bends to the learner — `adaptive.py` reads accuracy, answer **speed**, SRS **memory** load, and proficiency, then recommends `review_due` / `slow_down` / `accelerate` / `steady` and a dynamic pace (`/api/next`).
 - **Spaced Repetition (SRS):** SM-2 engine schedules reviews for long-term retention (`/api/srs/*`).
-- **1-on-1 AI Tutor (Text & Voice):** Conversational practice via OpenRouter, with **automatic free-model fallback** to protect the free tier.
-- **Explain My Answer:** Free AI grammar explanations on wrong answers (`/api/explain`).
-- **Gamification:** XP, levels, daily streak + freeze (loss-aversion), gems.
-- **Premium UI:** Calm "Indigo & Sumi-ink" design system (`frontend/theme.js`), dark-ready.
+- **1-on-1 AI voice chat:** speak to an in-character AI tutor in JP/KR — speech-to-text → LLM reply → spoken back, with conversation memory (`/api/voice-call`).
+- **AI text tutor + Explain My Answer:** chat practice and free AI grammar explanations on wrong answers (`/api/chat`, `/api/explain`), with **automatic free-model fallback** to protect the free tier.
+- **Custom AI study plan:** generate a goal-based path ("traveling to Tokyo in 2 weeks") via `/api/generate-path`.
+
+**Retention**
+- **Daily streak + freeze** (loss-aversion), **daily quests** that reset each midnight with gem rewards (`/api/quests`), a daily XP goal, and a **kind comeback/win-back** for lapsed users (`/api/comeback`) — "your tutor missed you," not a guilt-trip.
+
+**Design**
+- **Premium UI:** calm "Indigo & Sumi-ink" design system (`frontend/theme.js`), dark-ready.
+
+> Full differentiator + retention breakdown: [`docs/05_FEATURE_AND_RETENTION_STRATEGY.md`](./docs/05_FEATURE_AND_RETENTION_STRATEGY.md).
+
+---
+
+## How to Use the App
+
+1. **Pick a language** on the onboarding screen (Japanese or Korean).
+2. **Learn** tab — follow the path. It starts with **Section 0** (Hiragana / Hangul) so you can read first, then moves into greetings, ordering, numbers, and an AI free-talk "boss." Tap a node to do a ~3–5 min lesson; correct answers earn XP and the tutor speaks the feedback aloud.
+3. **Daily Review** (SRS) — clear due review cards each day to lock vocabulary into long-term memory. The app surfaces these when your memory load is high.
+4. **Call** tab — pick a scenario (friend, waiter, teacher, customs) and **hold the mic to speak**; the AI replies in the target language by voice. This is your free speaking practice.
+5. **Tutor** tab — text-chat with the AI tutor; tap the speaker icon to hear any reply.
+6. **Custom** tab — answer a few questions to generate a personalized study path.
+7. **Profile** tab — track streak, XP, gems, and buy a Streak Freeze.
+8. **Come back daily** — finish your **daily quests** and keep your **streak** alive; the app nudges you at your usual practice time (once notifications are wired on a hosted build).
 
 ---
 
@@ -112,8 +136,29 @@ The new 1-on-1 voice calling feature requires audio conversion.
 
 ```bash
 cd backend
-python3 -m pytest tests/ -q        # 15 tests: SRS, gamification, curriculum, model routing
+python3 -m pytest tests/ -q        # 27 tests: SRS, gamification, curriculum, model routing, adaptive, quests
 ```
+
+---
+
+## API Reference (backend)
+
+| Method & path | Purpose |
+|---|---|
+| `GET /api/curriculum?language=` | Full path incl. Section 0 (Hiragana/Hangul) |
+| `GET /api/progress` | XP, streak, hearts, gems (auto-updates streak) |
+| `POST /api/xp` | Award XP / adjust proficiency |
+| `POST /api/chat` | AI text tutor (level-adaptive) |
+| `POST /api/explain` | "Explain my answer" — free AI grammar help |
+| `POST /api/speak` · `GET /api/speak` | Text-to-speech (edge-tts) |
+| `POST /api/voice-call` | 1-on-1 voice chat: audio → STT → AI → spoken reply |
+| `POST /api/generate-path` | AI-generated custom study plan |
+| `POST /api/attempt` | Log answer correctness + response time (feeds adaptivity) |
+| `GET /api/next` | **Adaptive** next-step recommendation + pace |
+| `POST /api/srs/add` · `GET /api/srs/due` · `POST /api/srs/review` · `GET /api/srs/stats` | Spaced-repetition deck |
+| `GET /api/quests` · `POST /api/quests/progress` | Daily quests + rewards |
+| `GET /api/comeback` | Warm win-back status for lapsed users |
+| `POST /api/shop/freeze` | Buy a streak freeze (gems) |
 
 ---
 

@@ -13,6 +13,8 @@ from curriculum import get_curriculum
 from gamification import setup_db, get_db, calculate_streak, add_xp_and_adjust_proficiency, buy_streak_freeze
 from ai_config import build_payload, auth_headers, OPENROUTER_URL
 import srs
+import adaptive
+import quests
 
 load_dotenv()
 
@@ -61,9 +63,21 @@ class SrsReviewRequest(BaseModel):
     card_id: int
     grade: str  # 'again' | 'hard' | 'good' | 'easy'
 
-# Setup gamified DB + SRS deck on start
+class AttemptRequest(BaseModel):
+    lesson_id: str = ""
+    correct: bool = True
+    response_ms: int = 0
+    language: str = "Japanese"
+
+class QuestProgressRequest(BaseModel):
+    quest_key: str
+    amount: int = 1
+
+# Setup gamified DB + SRS deck + adaptive + quests on start
 setup_db()
 srs.setup_srs_db()
+adaptive.setup_adaptive_db()
+quests.setup_quests_db()
 
 @app.get("/")
 def read_root():
@@ -304,6 +318,67 @@ def srs_review(req: SrsReviewRequest):
 @app.get("/api/srs/stats")
 def srs_stats(language: str = None):
     return srs.deck_stats(language=language)
+
+
+# ---------------- Adaptive path (speed / pace / memory) ----------------
+
+@app.post("/api/attempt")
+def log_attempt(req: AttemptRequest):
+    """Record a single answer attempt (correctness + response time) for adaptivity."""
+    adaptive.record_attempt(req.lesson_id, req.correct, req.response_ms, req.language)
+    return {"success": True}
+
+
+@app.get("/api/next")
+def adaptive_next(language: str = None):
+    """
+    The adaptive brain: recommends the next step (review / slow down / accelerate /
+    steady) and a dynamic pace, from the learner's accuracy, speed, and memory.
+    """
+    conn = get_db()
+    prof = conn.execute("SELECT proficiency_score FROM users WHERE id=1").fetchone()["proficiency_score"]
+    conn.close()
+
+    stats = srs.deck_stats(language=language)
+    lapse_rate = 0.0
+    if stats["total"]:
+        # rough memory signal: mastered vs total inverts to a "forgetting" proxy
+        lapse_rate = max(0.0, 1.0 - (stats["mastered"] / stats["total"]))
+
+    return adaptive.recommend_next(
+        proficiency=prof, due_count=stats["due"], lapse_rate=lapse_rate
+    )
+
+
+# ---------------- Daily quests + retention ----------------
+
+@app.get("/api/quests")
+def get_quests():
+    return quests.get_today_quests()
+
+
+@app.post("/api/quests/progress")
+def advance_quest(req: QuestProgressRequest):
+    updated = quests.progress_quest(req.quest_key, req.amount)
+    if not updated:
+        raise HTTPException(status_code=404, detail="No such quest today")
+    # Reward gems the moment a quest is completed (and not already rewarded this call).
+    if updated["done"] and not updated["claimed"]:
+        conn = get_db()
+        conn.execute("UPDATE users SET gems = gems + ? WHERE id=1", (updated["reward_gems"],))
+        conn.execute("UPDATE daily_quests SET claimed=1 WHERE id=?", (updated["id"],))
+        conn.commit()
+        conn.close()
+    return {"success": True, "quest": updated}
+
+
+@app.get("/api/comeback")
+def comeback():
+    """Warm win-back status based on how long the user has been away."""
+    conn = get_db()
+    row = conn.execute("SELECT last_login, streak FROM users WHERE id=1").fetchone()
+    conn.close()
+    return quests.comeback_status(row["last_login"], row["streak"])
 
 
 

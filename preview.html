@@ -1,0 +1,233 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>AI-LangLearn — Preview Console</title>
+<style>
+  :root{
+    --primary:#4F46E5; --primaryDark:#3730A3; --primarySoft:#ECEBFB;
+    --success:#2FB67A; --successSoft:#DDF3E8; --danger:#E5484D; --dangerSoft:#FBE3E4;
+    --warning:#F59E0B; --gold:#EAB308; --violet:#8B5CF6;
+    --bg:#FAF9F5; --surface:#FFFFFF; --ink:#1F2430; --inkSoft:#4B5160;
+    --muted:#8A8F98; --border:#E6E3DA;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--ink);
+    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;line-height:1.5}
+  header{background:var(--surface);border-bottom:1px solid var(--border);
+    padding:14px 20px;display:flex;align-items:center;gap:16px;flex-wrap:wrap;position:sticky;top:0;z-index:5}
+  .brand{font-weight:700;color:var(--primary);letter-spacing:.5px}
+  .stat{font-weight:700;font-size:14px}
+  .stat small{color:var(--muted);font-weight:400}
+  .api{margin-left:auto;display:flex;gap:8px;align-items:center}
+  .api input{border:1px solid var(--border);border-radius:8px;padding:6px 10px;font-size:13px;width:220px}
+  .wrap{max-width:1080px;margin:0 auto;padding:20px;display:grid;grid-template-columns:1.3fr 1fr;gap:20px}
+  @media(max-width:820px){.wrap{grid-template-columns:1fr}}
+  .card{background:var(--surface);border:1px solid var(--border);border-radius:16px;padding:18px;margin-bottom:20px;
+    box-shadow:0 2px 10px rgba(31,36,48,.05)}
+  h2{font-size:16px;margin:0 0 12px}
+  .row{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+  button{font:inherit;cursor:pointer;border:none;border-radius:12px;padding:10px 14px;font-weight:600}
+  .btn{background:var(--primary);color:#fff}
+  .btn.ghost{background:var(--primarySoft);color:var(--primaryDark)}
+  .btn.sm{padding:6px 10px;font-size:13px;border-radius:10px}
+  .pill{background:var(--surface);border:1px solid var(--border);border-radius:999px;padding:6px 12px;font-size:13px;font-weight:600}
+  .pill.on{background:var(--primary);color:#fff;border-color:var(--primary)}
+  .module{font-weight:700;color:var(--inkSoft);margin:14px 0 8px;font-size:13px;text-transform:uppercase;letter-spacing:.4px}
+  .nodes{display:flex;flex-wrap:wrap;gap:10px}
+  .node{width:64px;height:64px;border-radius:50%;display:flex;align-items:center;justify-content:center;
+    color:#fff;font-size:22px;font-weight:700;cursor:pointer;box-shadow:0 4px 12px rgba(31,36,48,.12)}
+  .opt{display:block;width:100%;text-align:left;background:var(--surface);border:2px solid var(--border);
+    border-radius:12px;padding:12px 14px;margin:8px 0;font-weight:600;color:var(--ink);cursor:pointer}
+  .opt.correct{background:var(--successSoft);border-color:var(--success);color:#1E8A5B}
+  .opt.wrong{background:var(--dangerSoft);border-color:var(--danger);color:#C62A2F}
+  .muted{color:var(--muted)}
+  .qline{display:flex;justify-content:space-between;align-items:center;padding:8px 0;border-bottom:1px solid var(--border)}
+  .track{height:8px;background:var(--primarySoft);border-radius:999px;overflow:hidden;flex:1;margin-left:10px}
+  .fill{height:100%;background:var(--primary)}
+  .badge{display:inline-block;background:var(--primarySoft);color:var(--primaryDark);border-radius:999px;
+    padding:3px 10px;font-size:12px;font-weight:700}
+  .log{font-family:ui-monospace,Menlo,monospace;font-size:12px;color:var(--inkSoft);white-space:pre-wrap;
+    background:var(--bg);border:1px solid var(--border);border-radius:10px;padding:10px;max-height:140px;overflow:auto}
+  .chat{max-height:200px;overflow:auto;margin-bottom:10px}
+  .msg{padding:8px 12px;border-radius:14px;margin:6px 0;max-width:85%}
+  .me{background:var(--primary);color:#fff;margin-left:auto}
+  .ai{background:var(--bg);border:1px solid var(--border)}
+  .glyph{font-size:30px}
+</style>
+</head>
+<body>
+<header>
+  <span class="brand">AI-LangLearn</span>
+  <span class="pill on" id="langJP" onclick="setLang('Japanese')">🇯🇵 Japanese</span>
+  <span class="pill" id="langKR" onclick="setLang('Korean')">🇰🇷 Korean</span>
+  <span class="stat">🔥 <span id="sStreak">–</span> <small>streak</small></span>
+  <span class="stat">⚡ <span id="sXp">–</span> <small>xp</small></span>
+  <span class="stat">💎 <span id="sGems">–</span> <small>gems</small></span>
+  <div class="api">
+    <input id="apiUrl" value="http://localhost:8000" />
+    <button class="btn sm" onclick="reloadAll()">Connect</button>
+  </div>
+</header>
+
+<div class="wrap">
+  <div>
+    <div class="card">
+      <h2>Learning path <span class="muted" id="pathLang"></span></h2>
+      <div id="path"></div>
+    </div>
+
+    <div class="card" id="lessonCard" style="display:none">
+      <h2>Lesson</h2>
+      <div class="row"><div class="badge" id="persona"></div></div>
+      <p id="question" style="font-size:17px;font-weight:600;margin:12px 0"></p>
+      <div id="options"></div>
+      <p id="feedback"></p>
+      <button class="btn" id="explainBtn" style="display:none" onclick="explain()">Explain my answer</button>
+      <p id="explainOut" class="muted"></p>
+    </div>
+  </div>
+
+  <div>
+    <div class="card">
+      <h2>Adaptive next step</h2>
+      <div class="row"><span class="badge" id="nextAction">–</span><span id="nextPace" class="muted"></span></div>
+      <p id="nextReason" class="muted" style="margin:10px 0 0"></p>
+      <div class="log" id="nextSignals" style="margin-top:10px"></div>
+    </div>
+
+    <div class="card">
+      <h2>Daily quests <span class="badge" id="questCount"></span></h2>
+      <div id="quests"></div>
+    </div>
+
+    <div class="card">
+      <h2>Spaced repetition (SRS)</h2>
+      <p class="muted" id="srsStats">No cards yet — open a Script lesson to seed one.</p>
+      <div id="srsList"></div>
+    </div>
+
+    <div class="card">
+      <h2>AI tutor (text)</h2>
+      <div class="chat" id="chat"></div>
+      <div class="row">
+        <input id="chatIn" placeholder="Type a message…" style="flex:1;border:1px solid var(--border);border-radius:10px;padding:9px 12px" />
+        <button class="btn" onclick="sendChat()">Send</button>
+      </div>
+      <p class="muted" style="font-size:12px;margin:8px 0 0">Needs OPENROUTER_API_KEY in the backend .env. Without it you'll see an error here — that's expected.</p>
+    </div>
+  </div>
+</div>
+
+<script>
+let LANG='Japanese', CUR=null, CURRENT=null;
+const api = p => document.getElementById('apiUrl').value.replace(/\/$/,'') + p;
+const $ = id => document.getElementById(id);
+
+async function jget(p){const r=await fetch(api(p));return r.json();}
+async function jpost(p,b){const r=await fetch(api(p),{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(b)});return r.json();}
+
+function setLang(l){LANG=l;$('langJP').classList.toggle('on',l==='Japanese');$('langKR').classList.toggle('on',l==='Korean');reloadAll();}
+
+const ACCENTS=['#4F46E5','#8B5CF6','#2FB67A','#F59E0B'];
+async function loadPath(){
+  $('pathLang').textContent='· '+LANG;
+  CUR=await jget('/api/curriculum?language='+LANG);
+  let html='',n=0;
+  for(const m of CUR){
+    html+='<div class="module">'+m.module+'</div><div class="nodes">';
+    for(const les of m.lessons){
+      const c=les.lesson_name==='Conversation'?'#F59E0B':ACCENTS[n%4];
+      const icon=les.lesson_name==='Script'?'あ':(les.lesson_name==='Conversation'?'★':'•');
+      html+=`<div class="node" style="background:${c}" title="${les.lesson_name}" onclick='openLesson(${JSON.stringify(les).replace(/'/g,"&#39;")})'>${les.lesson_name==='Script'?'<span class=glyph>'+(les.srs_item||'あ')+'</span>':icon}</div>`;
+      n++;
+    }
+    html+='</div>';
+  }
+  $('path').innerHTML=html;
+}
+
+function openLesson(les){
+  CURRENT={les, start:Date.now()};
+  $('lessonCard').style.display='block';
+  $('persona').textContent=les.persona;
+  $('question').textContent=les.question;
+  $('feedback').textContent='';$('explainOut').textContent='';$('explainBtn').style.display='none';
+  $('options').innerHTML=les.options.map(o=>`<button class="opt" onclick='answer(this,${JSON.stringify(o)})'>${o}</button>`).join('');
+  $('lessonCard').scrollIntoView({behavior:'smooth'});
+}
+
+async function answer(btn,opt){
+  if(CURRENT.done)return;CURRENT.done=true;
+  const les=CURRENT.les, correct=opt===les.correct_answer;
+  document.querySelectorAll('.opt').forEach(b=>{
+    if(b.textContent===les.correct_answer)b.classList.add('correct');
+    else if(b===btn)b.classList.add('wrong');
+  });
+  $('feedback').textContent=correct?('✓ '+les.success_dialogue):('✗ '+les.fail_dialogue);
+  const ms=Date.now()-CURRENT.start;
+  await jpost('/api/attempt',{lesson_id:les.id,correct,response_ms:ms,language:LANG});
+  if(correct){await jpost('/api/xp',{amount:les.xp||10,is_correct:true});}
+  if(les.srs_item){await jpost('/api/srs/add',{item:les.srs_item,answer:les.srs_answer,language:LANG,tag:'script'});}
+  if(!correct){$('explainBtn').style.display='inline-block';}
+  await jpost('/api/quests/progress',{quest_key:'complete_2_lessons',amount:1});
+  refreshStats();loadNext();loadQuests();loadSrs();
+}
+
+async function explain(){
+  const les=CURRENT.les;$('explainOut').textContent='Thinking…';
+  const r=await jpost('/api/explain',{question:les.question,user_answer:'(your pick)',correct_answer:les.correct_answer,language:LANG});
+  $('explainOut').textContent=r.explanation+(r.fallback?'  (offline fallback)':'');
+}
+
+async function refreshStats(){
+  const p=await jget('/api/progress');
+  $('sStreak').textContent=p.streak;$('sXp').textContent=p.xp;$('sGems').textContent=p.gems;
+}
+
+async function loadNext(){
+  const n=await jget('/api/next?language='+LANG);
+  $('nextAction').textContent=n.action;$('nextPace').textContent='pace: '+n.pace+' new items';
+  $('nextReason').textContent=n.reason;
+  $('nextSignals').textContent=JSON.stringify(n.signals,null,1);
+}
+
+async function loadQuests(){
+  const q=await jget('/api/quests');
+  $('questCount').textContent=q.completed+'/'+q.total;
+  $('quests').innerHTML=q.quests.map(x=>`
+    <div class="qline"><span>${x.done?'✓':'○'} ${x.description}</span>
+    <span class="track"><span class="fill" style="width:${Math.min(100,100*x.progress/x.target)}%"></span></span>
+    <span class="muted" style="margin-left:8px">+${x.reward_gems}💎</span></div>`).join('');
+}
+
+async function loadSrs(){
+  const d=await jget('/api/srs/due?language='+LANG);
+  $('srsStats').textContent=`Due: ${d.stats.due} · Total: ${d.stats.total} · Mastered: ${d.stats.mastered}`;
+  $('srsList').innerHTML=d.cards.map(c=>`<div class="qline"><span class="glyph">${c.item}</span>
+    <span class="muted">= ${c.answer}</span>
+    <span class="row">
+      <button class="btn sm ghost" onclick="review(${c.id},'again')">Again</button>
+      <button class="btn sm" onclick="review(${c.id},'good')">Good</button>
+    </span></div>`).join('') || '<p class="muted">No reviews due. Open a Script lesson to add cards.</p>';
+}
+async function review(id,grade){await jpost('/api/srs/review',{card_id:id,grade});loadSrs();refreshStats();loadNext();}
+
+async function sendChat(){
+  const t=$('chatIn').value.trim();if(!t)return;$('chatIn').value='';
+  $('chat').innerHTML+=`<div class="msg me">${t}</div>`;
+  try{const r=await jpost('/api/chat',{message:t,language:LANG,level:'Beginner'});
+    $('chat').innerHTML+=`<div class="msg ai">${r.response||('Error: '+(r.detail||'no key?'))}</div>`;
+  }catch(e){$('chat').innerHTML+=`<div class="msg ai">Could not reach AI (set OPENROUTER_API_KEY).</div>`;}
+  $('chat').scrollTop=1e9;refreshStats();
+}
+
+async function reloadAll(){
+  try{await refreshStats();await loadPath();await loadNext();await loadQuests();await loadSrs();}
+  catch(e){alert('Could not reach the backend at '+$('apiUrl').value+'\nStart it with: uvicorn main:app --port 8000');}
+}
+reloadAll();
+</script>
+</body>
+</html>
